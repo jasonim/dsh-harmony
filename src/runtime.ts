@@ -11,7 +11,7 @@ import {
   type HarmonyBuildArgs,
 } from './lifecycle.ts'
 import type { HarmonyToolName } from './contracts.ts'
-import { assertTappable, findUniqueNode, type HarmonyUiNode } from './ui-tree.ts'
+import { assertTappable, extractUiRows, findUniqueNode, type HarmonyUiNode, type HarmonyUiRow } from './ui-tree.ts'
 import type { HarmonyUiAction } from './ui-actions.ts'
 import { recognizeImage } from './ocr.ts'
 
@@ -104,16 +104,9 @@ function parseProcesses(output: string): Array<{ pid: number; name: string }> {
   return processes
 }
 
-interface HarmonyRow {
-  index: number
-  bounds: { x: number; y: number; width: number; height: number }
-  label: string
-  nodeIndex: number
-}
-
 interface HarmonyRowsResult {
   device: string
-  rows: HarmonyRow[]
+  rows: HarmonyUiRow[]
   count: number
   truncated: boolean
 }
@@ -290,21 +283,9 @@ export class HarmonyRuntime {
 
   async #uiRows(args: Record<string, unknown>): Promise<HarmonyRowsResult> {
     const device = await this.#resolveDevice(stringArg(args, 'device'))
-    const tree = await this.#controller.uiTree(device)
-    const parents = new Map<number, HarmonyUiNode[]>()
-    for (const node of tree.nodes) {
-      if (node.parentIndex === undefined || node.bounds.width < 1 || node.bounds.height < 1) continue
-      const group = parents.get(node.parentIndex) ?? []
-      group.push(node)
-      parents.set(node.parentIndex, group)
-    }
-    const group = [...parents.values()].sort((left, right) => right.length - left.length)[0] ?? []
-    const rows = group.map((node, index) => ({
-      index,
-      bounds: node.bounds,
-      label: [node.text, node.description, node.hint].filter(Boolean).join(' '),
-      nodeIndex: node.index,
-    }))
+    const maxDepth = numberArg(args, 'maxDepth')
+    const tree = await this.#controller.uiTree(device, maxDepth === undefined ? {} : { maxDepth })
+    const rows = extractUiRows(tree.nodes)
     return { device, rows, count: rows.length, truncated: tree.truncated }
   }
 

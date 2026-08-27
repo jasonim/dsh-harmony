@@ -25,6 +25,13 @@ export interface HarmonyUiNode {
   parentIndex?: number
 }
 
+export interface HarmonyUiRow {
+  index: number
+  bounds: HarmonyBounds
+  label: string
+  nodeIndex: number
+}
+
 interface RawUiNode {
   attributes?: Record<string, unknown>
   children?: unknown
@@ -156,3 +163,55 @@ export function assertTappable(node: HarmonyUiNode): void {
   }
 }
 
+function isDescendant(
+  node: HarmonyUiNode,
+  ancestorIndex: number,
+  byIndex: ReadonlyMap<number, HarmonyUiNode>,
+): boolean {
+  let parentIndex = node.parentIndex
+  const visited = new Set<number>()
+  while (parentIndex !== undefined && !visited.has(parentIndex)) {
+    if (parentIndex === ancestorIndex) return true
+    visited.add(parentIndex)
+    parentIndex = byIndex.get(parentIndex)?.parentIndex
+  }
+  return false
+}
+
+export function extractUiRows(nodes: readonly HarmonyUiNode[]): HarmonyUiRow[] {
+  const byIndex = new Map(nodes.map(node => [node.index, node]))
+  const groups = new Map<number, HarmonyUiNode[]>()
+  for (const node of nodes) {
+    if (node.parentIndex === undefined || !node.visible || node.bounds.width < 1 || node.bounds.height < 1) continue
+    const siblings = groups.get(node.parentIndex) ?? []
+    siblings.push(node)
+    groups.set(node.parentIndex, siblings)
+  }
+  const candidates = [...groups.entries()]
+    .filter(([, siblings]) => siblings.length >= 2)
+    .map(([parentIndex, siblings]) => {
+      const parent = byIndex.get(parentIndex)
+      const semantic = parent?.scrollable === true || /(?:list|scroll|waterflow|grid)/iu.test(parent?.type ?? '')
+      return { siblings, score: siblings.length + (semantic ? 10_000 : 0) }
+    })
+    .sort((left, right) => right.score - left.score)
+  const siblings = candidates[0]?.siblings ?? []
+  const ordered = [...siblings].sort((left, right) => (
+    left.bounds.y - right.bounds.y || left.bounds.x - right.bounds.x || left.index - right.index
+  ))
+  return ordered.map((row, index) => {
+    const values: string[] = []
+    const seen = new Set<string>()
+    for (const node of nodes) {
+      if (node.index !== row.index && !isDescendant(node, row.index, byIndex)) continue
+      for (const value of [node.text, node.description, node.hint]) {
+        const text = value?.trim()
+        if (text !== undefined && text !== '' && !seen.has(text)) {
+          seen.add(text)
+          values.push(text)
+        }
+      }
+    }
+    return { index, bounds: row.bounds, label: values.join(' '), nodeIndex: row.index }
+  })
+}
