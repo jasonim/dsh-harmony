@@ -13,9 +13,9 @@ describe('stream capabilities', () => {
       now: () => now,
     })
 
-    const signed = await access.sign({ kind: 'frame', device: 'device-abc', session: 's1' }, 500)
+    const signed = await access.sign({ kind: 'frame', device: 'device-abcdef123456', session: 's1' }, 500)
 
-    assert.equal((await access.verify(signed.token, 'frame'))?.device, 'device-abc')
+    assert.equal((await access.verify(signed.token, 'frame'))?.device, 'device-abcdef123456')
     assert.equal(await access.verify(signed.token, 'control'), undefined)
     assert.equal(await access.verify(`${signed.token}x`, 'frame'), undefined)
     now = 1501
@@ -58,4 +58,3 @@ describe('stream capabilities', () => {
     }
   })
 })
-
