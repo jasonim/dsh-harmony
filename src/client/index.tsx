@@ -3,7 +3,7 @@ import { createRoot, type Root } from 'react-dom/client'
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 import type { ToolCallViewProps } from '@deepseek-ai/dsh-client-ui-tool/client'
 import { harmonyPanelStore, type HarmonyPanelStore } from './panel-store.ts'
-import { grantNeedsRefresh, normalizedPoint, parseHarmonyResult, type HarmonyPanelSource } from './protocol.ts'
+import { containedImageRect, grantNeedsRefresh, normalizedPoint, parseHarmonyResult, type HarmonyPanelSource } from './protocol.ts'
 
 export const name = 'dsh-harmony-client'
 export const inject = ['slots']
@@ -160,14 +160,16 @@ function HarmonyLivePanel(props: { source: HarmonyPanelSource; onClose(): void }
               objectFit: 'contain', touchAction: 'none', userSelect: 'none',
             }}
             onPointerDown={event => {
-              pointer.current = normalizedPoint(event, event.currentTarget.getBoundingClientRect())
+              const rect = containedImageRect(event.currentTarget.getBoundingClientRect(), source.width, source.height)
+              pointer.current = normalizedPoint(event, rect)
               event.currentTarget.setPointerCapture(event.pointerId)
             }}
             onPointerUp={event => {
               const start = pointer.current
               pointer.current = undefined
               if (start === undefined) return
-              const end = normalizedPoint(event, event.currentTarget.getBoundingClientRect())
+              const rect = containedImageRect(event.currentTarget.getBoundingClientRect(), source.width, source.height)
+              const end = normalizedPoint(event, rect)
               const distance = Math.hypot(end.x - start.x, end.y - start.y)
               void control(distance < 0.02
                 ? { action: 'tap', frameId, x: end.x, y: end.y }
@@ -244,4 +246,4 @@ export function apply(ctx: ClientContext): void {
   }, 'dsh-harmony: live device panel')
 }
 
-export { grantNeedsRefresh, normalizedPoint, parseHarmonyResult, type HarmonyPanelSource } from './protocol.ts'
+export { containedImageRect, grantNeedsRefresh, normalizedPoint, parseHarmonyResult, type HarmonyPanelSource } from './protocol.ts'

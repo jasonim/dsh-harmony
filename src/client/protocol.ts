@@ -45,6 +45,28 @@ export function normalizedPoint(
   }
 }
 
+export function containedImageRect(
+  rect: { left: number; top: number; width: number; height: number },
+  naturalWidth?: number,
+  naturalHeight?: number,
+): { left: number; top: number; width: number; height: number } {
+  if (
+    typeof naturalWidth !== 'number' || typeof naturalHeight !== 'number'
+    || !Number.isFinite(naturalWidth) || !Number.isFinite(naturalHeight)
+    || naturalWidth <= 0 || naturalHeight <= 0 || rect.width <= 0 || rect.height <= 0
+  ) return rect
+
+  const scale = Math.min(rect.width / naturalWidth, rect.height / naturalHeight)
+  const width = naturalWidth * scale
+  const height = naturalHeight * scale
+  return {
+    left: rect.left + (rect.width - width) / 2,
+    top: rect.top + (rect.height - height) / 2,
+    width,
+    height,
+  }
+}
+
 export function grantNeedsRefresh(expiresAt: number, now = Date.now(), skewMs = 5_000): boolean {
   if (!Number.isFinite(expiresAt) || !Number.isFinite(now) || !Number.isFinite(skewMs) || skewMs < 0) return true
   return expiresAt - now <= skewMs
