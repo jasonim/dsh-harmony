@@ -53,6 +53,31 @@ describe('runListProbe', () => {
     }])
     assert.equal(JSON.stringify(report).includes('SERIAL-ONE'), false)
   })
+
+  it('allows a bounded HDC startup window for target enumeration', async () => {
+    const execute = async (_binary, args, options) => {
+      if (args.join('\u0000') === 'list\u0000targets\u0000-v') {
+        assert.ok(options.timeoutMs >= 20_000)
+        return successfulResult('[Empty]\n')
+      }
+      return successfulResult('Ver: 3.2.0c\n')
+    }
+
+    const report = await runListProbe({ hdcBinary: '/sdk/hdc', execute })
+    assert.equal(report.deviceCount, 0)
+  })
+
+  it('rejects HDC textual failures even when the process exits with code zero', async () => {
+    const overrides = new Map([
+      ['list\u0000targets\u0000-v', successfulResult('Connect server failed\n')],
+    ])
+    const { execute } = createFakeExecute(overrides)
+
+    await assert.rejects(
+      runListProbe({ hdcBinary: '/sdk/hdc', execute }),
+      error => error instanceof ProbeProcessError && error.code === 'HDC_LIST_FAILED',
+    )
+  })
 })
 
 describe('runDeviceProbe', () => {
