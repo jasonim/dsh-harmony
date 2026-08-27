@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process'
 import { access, lstat, readdir, realpath } from 'node:fs/promises'
 import { constants as fsConstants } from 'node:fs'
-import { isAbsolute, join, resolve } from 'node:path'
+import { dirname, isAbsolute, join, resolve } from 'node:path'
 
 const NAME = /^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$/u
 const IGNORED_DIRECTORIES = new Set(['node_modules', 'oh_modules', '.git', '.hvigor', '.idea'])
@@ -179,6 +179,17 @@ export async function resolveHvigor(env: NodeJS.ProcessEnv = process.env): Promi
   return 'hvigorw'
 }
 
+export function hostProcessEnvironment(
+  env: NodeJS.ProcessEnv = process.env,
+  execPath = process.execPath,
+): NodeJS.ProcessEnv {
+  const configured = env.NODE_HOME?.trim()
+  return {
+    ...env,
+    NODE_HOME: configured === undefined || configured === '' ? dirname(dirname(execPath)) : configured,
+  }
+}
+
 export function runHostProcess(
   command: string,
   args: readonly string[],
@@ -189,6 +200,7 @@ export function runHostProcess(
   return new Promise((resolveResult, reject) => {
     const child = spawn(command, [...args], {
       cwd: options.cwd,
+      env: hostProcessEnvironment(),
       shell: false,
       windowsHide: true,
       stdio: ['ignore', 'pipe', 'pipe'],
