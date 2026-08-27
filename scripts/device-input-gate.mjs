@@ -7,6 +7,7 @@ import { join } from 'node:path'
 
 import { HarmonyDeviceController } from '../src/device-controller.ts'
 import { HarmonyHdcClient } from '../src/hdc.ts'
+import { assertAbilityCommandSucceeded, assertInstallCommandSucceeded } from '../src/lifecycle.ts'
 import { assertTappable, findUniqueNode } from '../src/ui-tree.ts'
 import {
   HARNESS_ABILITY,
@@ -45,9 +46,12 @@ async function main() {
   const device = args.device ?? (ready.length === 1 ? ready[0].id : undefined)
   if (device === undefined) throw new Error('Exactly one USB + Connected device is required, or pass --device')
 
-  await client.exec(device, ['app', 'install', '-r', hapPath], { timeoutMs: 120_000 })
-  await client.exec(device, ['shell', 'aa', 'force-stop', HARNESS_BUNDLE])
-  await client.exec(device, ['shell', 'aa', 'start', '-b', HARNESS_BUNDLE, '-a', HARNESS_ABILITY])
+  const installed = await client.exec(device, ['app', 'install', '-r', hapPath], { timeoutMs: 120_000 })
+  assertInstallCommandSucceeded(installed.stdout)
+  const stopped = await client.exec(device, ['shell', 'aa', 'force-stop', HARNESS_BUNDLE])
+  assertAbilityCommandSucceeded(stopped.stdout)
+  const started = await client.exec(device, ['shell', 'aa', 'start', '-b', HARNESS_BUNDLE, '-a', HARNESS_ABILITY])
+  assertAbilityCommandSucceeded(started.stdout)
   await sleep(1500)
 
   const controller = new HarmonyDeviceController(client, {

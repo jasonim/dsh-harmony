@@ -3,6 +3,8 @@ import { join } from 'node:path'
 import { HarmonyDeviceController, type HarmonyFrame } from './device-controller.ts'
 import { HarmonyHdcClient } from './hdc.ts'
 import {
+  assertAbilityCommandSucceeded,
+  assertInstallCommandSucceeded,
   boundedLogText,
   buildHarmonyProject,
   collectLogSnapshots,
@@ -208,6 +210,7 @@ export class HarmonyRuntime {
     const device = stringArg(args, 'device')
     const hapPath = stringArg(args, 'hapPath', true)!
     const result = await this.#client.exec(device, installCommand(hapPath, booleanArg(args, 'replace')))
+    assertInstallCommandSucceeded(result.stdout)
     return { device, hapPath, replaced: booleanArg(args, 'replace'), output: result.stdout.trim() }
   }
 
@@ -216,7 +219,8 @@ export class HarmonyRuntime {
     const bundle = stringArg(args, 'bundle', true)!
     const ability = stringArg(args, 'ability', true)!
     for (const command of launchCommands(bundle, ability, booleanArg(args, 'relaunch'))) {
-      await this.#client.exec(device, command)
+      const result = await this.#client.exec(device, command)
+      assertAbilityCommandSucceeded(result.stdout)
     }
     return { device, bundle, ability, launched: true }
   }

@@ -87,6 +87,16 @@ export function launchCommands(bundle: string, ability: string, relaunch: boolea
   ]
 }
 
+const DEVICE_COMMAND_FAILURE = /(?:^|\s)(?:error\s*:|error code\s*:|failed to|fail to)/iu
+
+export function assertInstallCommandSucceeded(output: string): void {
+  if (DEVICE_COMMAND_FAILURE.test(output)) throw new Error('Harmony app install failed')
+}
+
+export function assertAbilityCommandSucceeded(output: string): void {
+  if (DEVICE_COMMAND_FAILURE.test(output)) throw new Error('Harmony ability command failed')
+}
+
 export function boundedLogText(
   source: string,
   options: { maxLines?: number; maxBytes?: number } = {},
