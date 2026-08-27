@@ -3,7 +3,7 @@ import { describe, it } from 'node:test'
 
 import { deviceHash } from '../scripts/lib/probe-core.mjs'
 import { ProbeProcessError } from '../scripts/lib/probe-runner.mjs'
-import { runDeviceProbe, runListProbe } from '../scripts/lib/probe-report.mjs'
+import { runDeviceProbe, runListProbe, runSoakProbe } from '../scripts/lib/probe-report.mjs'
 
 function successfulResult(stdout = '') {
   return {
@@ -132,5 +132,44 @@ describe('runDeviceProbe', () => {
       }),
       error => error instanceof ProbeProcessError && error.code === 'DEVICE_NOT_USB',
     )
+  })
+})
+
+describe('runSoakProbe', () => {
+  it('runs screenshot samples sequentially and reports bounded duration statistics', async () => {
+    const { execute } = createFakeExecute()
+    const durations = [10, 30, 20]
+    let active = 0
+    let maxActive = 0
+    const screenshotProbe = async () => {
+      active += 1
+      maxActive = Math.max(maxActive, active)
+      const durationMs = durations.shift()
+      active -= 1
+      return { available: true, durationMs, bytes: 24, width: 100, height: 200 }
+    }
+
+    const report = await runSoakProbe({
+      hdcBinary: '/sdk/hdc',
+      reference: deviceHash('SERIAL-ONE'),
+      iterations: 3,
+      execute,
+      screenshotProbe,
+    })
+
+    assert.equal(maxActive, 1)
+    assert.equal(report.mode, 'soak')
+    assert.equal(report.iterations, 3)
+    assert.equal(report.successCount, 3)
+    assert.equal(report.failureCount, 0)
+    assert.deepEqual(report.durations, {
+      count: 3,
+      minMs: 10,
+      maxMs: 30,
+      meanMs: 20,
+      p50Ms: 20,
+      p95Ms: 30,
+    })
+    assert.equal(JSON.stringify(report).includes('SERIAL-ONE'), false)
   })
 })
