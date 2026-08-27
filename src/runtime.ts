@@ -13,6 +13,7 @@ import {
 import type { HarmonyToolName } from './contracts.ts'
 import { assertTappable, findUniqueNode, type HarmonyUiNode } from './ui-tree.ts'
 import type { HarmonyUiAction } from './ui-actions.ts'
+import { recognizeImage } from './ocr.ts'
 
 export interface OcrItem {
   text: string
@@ -150,7 +151,11 @@ export class HarmonyRuntime {
       cacheDir: options.cacheDir ?? join(tmpdir(), 'dsh-harmony'),
     })
     this.#build = options.build ?? buildHarmonyProject
-    this.#ocr = options.ocr
+    this.#ocr = options.ocr ?? (process.platform === 'darwin' ? recognizeImage : undefined)
+  }
+
+  latestFrame(device: string): HarmonyFrame | undefined {
+    return this.#controller.latestFrame(device)
   }
 
   async execute(name: HarmonyToolName, args: Record<string, unknown>): Promise<any> {

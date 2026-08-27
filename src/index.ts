@@ -3,6 +3,7 @@ import { defineTool, type JsonValue, type ToolDefinition } from '@deepseek-ai/ds
 import type ToolRegistry from '@deepseek-ai/dsh-tools'
 import { PLUGIN_NAME } from './contracts.ts'
 import { HarmonyRuntime } from './runtime.ts'
+import { installStreamRoutes } from './stream-routes.ts'
 import { createHarmonyToolSpecs, type HarmonyToolSpec } from './tool-specs.ts'
 
 export * from './contracts.ts'
@@ -10,6 +11,8 @@ export * from './device-controller.ts'
 export * from './hdc.ts'
 export * from './lifecycle.ts'
 export * from './runtime.ts'
+export * from './stream-access.ts'
+export * from './stream-routes.ts'
 export * from './tool-specs.ts'
 export * from './ui-actions.ts'
 export * from './ui-tree.ts'
@@ -44,6 +47,7 @@ function asTool(spec: HarmonyToolSpec): ToolDefinition {
 export function apply(ctx: Context): () => Promise<void> {
   const host = ctx as HostContext
   const runtime = new HarmonyRuntime()
+  installStreamRoutes(ctx, runtime)
   const tools = createHarmonyToolSpecs(runtime).map(asTool)
   const disposers = tools.map(tool => ctx.effect(
     () => host.tools.register(tool),

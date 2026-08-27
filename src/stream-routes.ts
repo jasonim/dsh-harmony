@@ -13,7 +13,7 @@ export const CONTROL_PREFIX = `${ROUTE_PREFIX}/control`
 
 interface RuntimeLike {
   execute(name: HarmonyToolName, args: Record<string, unknown>): Promise<any>
-  latestFrame(device: string): { path: string; [key: string]: unknown } | undefined
+  latestFrame(device: string): { path: string } | undefined
 }
 
 interface RouteCarrier {
@@ -187,6 +187,7 @@ export function mountStreamRoutes(carrier: RouteCarrier, routes: HarmonyStreamRo
 }
 
 export function installStreamRoutes(ctx: Context, runtime: RuntimeLike): void {
+  if (typeof (ctx as Context & { inject?: unknown }).inject !== 'function') return
   ctx.inject(['webServer'], webContext => webContext.effect(() => {
     const carrier = (webContext as Context & { webServer: RouteCarrier }).webServer
     return mountStreamRoutes(carrier, new HarmonyStreamRoutes(runtime))
