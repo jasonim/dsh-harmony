@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process'
 import { access, lstat, readdir, realpath } from 'node:fs/promises'
-import { constants as fsConstants } from 'node:fs'
+import { constants as fsConstants, existsSync } from 'node:fs'
 import { dirname, isAbsolute, join, resolve } from 'node:path'
 
 const NAME = /^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$/u
@@ -182,11 +182,20 @@ export async function resolveHvigor(env: NodeJS.ProcessEnv = process.env): Promi
 export function hostProcessEnvironment(
   env: NodeJS.ProcessEnv = process.env,
   execPath = process.execPath,
+  platform = process.platform,
+  pathExists: (path: string) => boolean = existsSync,
 ): NodeJS.ProcessEnv {
   const configured = env.NODE_HOME?.trim()
+  const deveco = env.DEVECO_SDK_HOME?.trim()
+  const defaultSdk = '/Applications/DevEco-Studio.app/Contents/sdk'
   return {
     ...env,
     NODE_HOME: configured === undefined || configured === '' ? dirname(dirname(execPath)) : configured,
+    ...(deveco !== undefined && deveco !== ''
+      ? { DEVECO_SDK_HOME: deveco }
+      : platform === 'darwin' && pathExists(defaultSdk)
+        ? { DEVECO_SDK_HOME: defaultSdk }
+        : {}),
   }
 }
 

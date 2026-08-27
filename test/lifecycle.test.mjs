@@ -22,7 +22,7 @@ describe('Harmony lifecycle helpers', () => {
       '/custom/node',
     )
     assert.equal(
-      hostProcessEnvironment({}, '/opt/node/bin/node', 'darwin').DEVECO_SDK_HOME,
+      hostProcessEnvironment({}, '/opt/node/bin/node', 'darwin', () => true).DEVECO_SDK_HOME,
       '/Applications/DevEco-Studio.app/Contents/sdk',
     )
     assert.equal(hostProcessEnvironment({}, '/opt/node/bin/node', 'linux').DEVECO_SDK_HOME, undefined)
