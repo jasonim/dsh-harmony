@@ -30,6 +30,9 @@ test('release carries MIT and upstream attribution', async () => {
 test('published package includes the local OCR source used at runtime', async () => {
   const manifest = JSON.parse(await read('package.json'))
   assert.ok(manifest.files.includes('assets'))
+  assert.ok(manifest.files.includes('docs'))
+  assert.ok(manifest.files.includes('plans'))
+  assert.ok(manifest.files.includes('fixtures/harness-app'))
   assert.match(await read('assets/ocr.swift'), /Vision/)
 })
 
