@@ -1,0 +1,16 @@
+.DS_Store
+.client-build/
+node_modules/
+.pnpm-store/
+
+.env
+.env.*
+.npmrc
+*.pem
+*.key
+
+lib/
+coverage/
+*.log
+*.tgz
+artifacts/

@@ -100,6 +100,10 @@ export function buildUiInputCommand(
     ]
   }
 
+  if (action.action !== 'scroll') {
+    throw new TypeError(`UiTest received unknown action ${String(action.action)}`)
+  }
+
   const paths = {
     down: [0.5, 0.75, 0.5, 0.25],
     up: [0.5, 0.25, 0.5, 0.75],
