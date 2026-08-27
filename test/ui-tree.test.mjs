@@ -52,7 +52,10 @@ describe('Harmony UI tree', () => {
 
     assert.equal(findUniqueNode(nodes, { resourceId: 'submit' }).id, 'submit')
     assert.equal(findUniqueNode(nodes, { text: '提交' }).accessibilityId, 'submit-button')
-    assert.throws(() => findUniqueNode(nodes, { text: 't' }), /ambiguous/u)
+    assert.throws(
+      () => findUniqueNode([...nodes, { ...nodes[1], id: 'submit-copy' }], { text: '提交' }),
+      /ambiguous/u,
+    )
   })
 
   test('refuses disabled, invisible, and zero-area targets', async () => {
@@ -75,4 +78,3 @@ describe('Harmony UI tree', () => {
     assert.equal(result.truncated, true)
   })
 })
-
