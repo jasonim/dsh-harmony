@@ -77,4 +77,31 @@ describe('Harmony UI tree', () => {
     assert.equal(result.nodes.length, 1)
     assert.equal(result.truncated, true)
   })
+
+  test('extracts semantic rows and aggregates nested descendant labels', async () => {
+    const { extractUiRows, flattenUiTree } = await import('../src/ui-tree.ts')
+    const tree = {
+      attributes: { type: 'Column', bounds: '[0,0][1000,2000]' },
+      children: [{
+        attributes: { type: 'List', scrollable: 'true', bounds: '[0,200][1000,1800]' },
+        children: [
+          {
+            attributes: { type: 'ListItem', bounds: '[0,200][1000,400]' },
+            children: [{ attributes: { type: 'Text', text: 'Alpha', bounds: '[20,220][400,280]' } }],
+          },
+          {
+            attributes: { type: 'ListItem', bounds: '[0,400][1000,600]' },
+            children: [{ attributes: { type: 'Text', text: 'Beta', description: 'Second', bounds: '[20,420][400,480]' } }],
+          },
+        ],
+      }],
+    }
+
+    const rows = extractUiRows(flattenUiTree(tree).nodes)
+
+    assert.equal(rows.length, 2)
+    assert.equal(rows[0].label, 'Alpha')
+    assert.equal(rows[1].label, 'Beta Second')
+    assert.deepEqual(rows[1].bounds, { x: 0, y: 400, width: 1000, height: 200 })
+  })
 })
