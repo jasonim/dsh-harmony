@@ -97,5 +97,16 @@ describe('HarmonyRuntime', () => {
     assert.equal(found.items.length, 1)
     assert.equal(waited.matched, true)
   })
-})
 
+  test('rejects unsafe bundle identifiers before shell-backed inspection', async () => {
+    const deps = fixture()
+    const { HarmonyRuntime } = await import('../src/runtime.ts')
+    const runtime = new HarmonyRuntime(deps)
+
+    await assert.rejects(
+      runtime.execute('harmony_app_info', { device: 'device-abc', bundle: 'com.example;rm' }),
+      /invalid bundle/u,
+    )
+    assert.equal(deps.calls.some(call => call.args.includes('com.example;rm')), false)
+  })
+})

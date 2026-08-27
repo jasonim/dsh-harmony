@@ -60,4 +60,19 @@ describe('Harmony lifecycle helpers', () => {
     assert.ok(Buffer.byteLength(bounded.text) <= 90)
     assert.equal(bounded.truncated, true)
   })
+
+  test('builds fixed HiLog commands and merges bounded follow snapshots', async () => {
+    const { collectLogSnapshots, hilogCommand } = await import('../src/lifecycle.ts')
+    assert.deepEqual(hilogCommand({ pid: 42 }), ['shell', 'hilog', '-x', '-z', '300', '-P', '42'])
+    assert.throws(() => hilogCommand({ pid: -1 }), /pid/u)
+
+    let clock = 0
+    const snapshots = ['old\nshared', 'shared\nnew', 'shared\nnew']
+    const text = await collectLogSnapshots(
+      async () => snapshots.shift() ?? '',
+      { durationMs: 1000, pollMs: 500, now: () => clock, pause: async ms => { clock += ms } },
+    )
+
+    assert.equal(text, 'old\nshared\nnew')
+  })
 })
