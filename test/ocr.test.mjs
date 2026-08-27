@@ -24,3 +24,11 @@ test('rejects malformed OCR payloads and duplicate observations', async () => {
   ] })).length, 1)
 })
 
+test('default runtime configures local OCR on macOS', async () => {
+  const source = await (await import('node:fs/promises')).readFile(
+    new URL('../src/runtime.ts', import.meta.url),
+    'utf8',
+  )
+
+  assert.match(source, /recognizeImage/u)
+})

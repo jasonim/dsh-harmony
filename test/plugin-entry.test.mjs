@@ -8,6 +8,7 @@ test('host entry constructs the executable runtime instead of a pending stub', a
   assert.match(source, /import \{ HarmonyRuntime \} from '\.\/runtime\.ts'/u)
   assert.match(source, /new HarmonyRuntime\(/u)
   assert.doesNotMatch(source, /runtime initialization is pending/u)
+  assert.match(source, /installStreamRoutes\(ctx, runtime\)/u)
 })
 
 test('apply registers all tools and disposes them in reverse order', async () => {
@@ -32,4 +33,3 @@ test('apply registers all tools and disposes them in reverse order', async () =>
   assert.equal(registered.length, 18)
   assert.deepEqual(disposed, [...registered].reverse())
 })
-
