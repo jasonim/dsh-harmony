@@ -1,6 +1,6 @@
 # DSH Harmony v0.1 支持契约
 
-> 状态：草案；截图与 UI tree 真机门已通过，输入门待验证  
+> 状态：RC 支持契约；截图与 UI tree 真机门已通过，输入门等待可信开发者签名  
 > 更新：2026-08-27
 
 ## 用户旅程
@@ -133,10 +133,11 @@ HARMONY_HDC=/absolute/path/to/hdc node scripts/probe-device.mjs --list
 | 截图耗时 | min 965.70 ms，mean 1062.37 ms，p50 1058.72 ms，p95 1131.13 ms，max 1214.19 ms |
 | 预览候选刷新率 | 约 0.94 FPS，满足 0.5–2 FPS 的 v0.1 目标区间 |
 | 输入命令发现 | `PARTIAL`；help 暴露 `uiInput`、`click`、`inputText`、`keyEvent`，未暴露独立 `swipe`/`drag` 命令 |
-| 实际 click/swipe/Back | `UNVERIFIED`；等待确定性测试 HAP/页面，避免操作未知前台界面 |
+| 确定性测试 HAP | `PASS`；当前 DevEco/Hvigor 真实编译成功，固定 bundle 为 `com.deepseek.dsh.harness` |
+| 实际 click/swipe/text/Back | `BLOCKED`；通用 OpenHarmony 证书被零售 HarmonyOS 真机以 `fail to verify pkcs7 file` 拒绝；安全门在安装失败后不执行输入 |
 
 本次探针只保存聚合指标；没有持久化截图、完整控件树或 raw connect-key。
 
 ## 当前结论
 
-截至 2026-08-27：探针实现、单元/集成测试和安全输出契约已完成。截图、UI tree 与 100 帧稳定性门已通过；输入行为门仍为 `UNVERIFIED`。在确定性测试页面验证 click/swipe/Back 之前，WP1 可以搭建只读设备会话骨架，但不得开放写入型工具或宣称完整交互可行。
+截至 2026-08-27：插件实现、确定性测试 HAP、单元/集成测试、安全路由、侧栏、安装包和 DSH web 加载冒烟均已完成。截图、UI tree 与 100 帧稳定性门已通过。输入安全门已实现，并会在安装或前台 bundle 校验失败时停止；但 30 次点击、10 次滑动、10 次输入和 Back 的真机行为仍需一个由目标零售设备信任的 HarmonyOS 开发者签名 HAP 才能盖章。在该证据产生之前只能称为 RC，不宣称生产级完整交互已验证。

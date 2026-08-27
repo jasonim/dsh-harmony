@@ -1,6 +1,6 @@
 # DSH Harmony 真机插件开发计划
 
-> 状态：执行中；WP0 截图/UI tree 门已通过，输入行为门待验证
+> 状态：实现完成（RC）；仅剩可信签名 HAP 的真机输入行为门
 > 日期：2026-08-27  
 > 仓库：`dsh-harmony`  
 > 参考实现：[`ZSeven-W/dsh-ios`](https://github.com/ZSeven-W/dsh-ios)，研究基线 `main@9e3b600ba556baf64bbe74ebf39fa1b2ce30545c`
