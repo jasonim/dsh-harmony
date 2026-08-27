@@ -48,3 +48,12 @@ test('client panel uses signed grant, capture, frame, and control routes', async
   assert.match(source, /marginRight/u)
   assert.match(source, /openIfIdle/u)
 })
+
+test('tall device frames are contained by both panel axes instead of clipped by width', async () => {
+  const source = await readFile(new URL('../src/client/index.tsx', import.meta.url), 'utf8')
+
+  assert.match(source, /position: 'relative'.*overflow: 'hidden'/u)
+  assert.match(source, /position: 'absolute', inset: 0/u)
+  assert.match(source, /width: '100%', height: '100%', objectFit: 'contain'/u)
+  assert.doesNotMatch(source, /maxWidth: '100%', maxHeight: '100%'/u)
+})
