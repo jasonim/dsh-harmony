@@ -1,0 +1,2 @@
+# Deliberately empty: this fixture is for deterministic device testing.
+

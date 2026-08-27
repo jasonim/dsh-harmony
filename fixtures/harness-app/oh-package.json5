@@ -1,0 +1,9 @@
+{
+  "modelVersion": "5.0.0",
+  "name": "dsh-harness-app",
+  "version": "1.0.0",
+  "description": "Deterministic input target for dsh-harmony",
+  "dependencies": {},
+  "devDependencies": {}
+}
+
