@@ -4,6 +4,7 @@ import type { ToolCallViewProps } from '@deepseek-ai/dsh-client-ui-tool/client'
 import { grantNeedsRefresh, normalizedPoint, parseHarmonyResult } from './protocol.ts'
 
 export const name = 'dsh-harmony-client'
+export const inject = ['slots']
 const GRANT_PATH = '/_dsh/dsh-harmony/grant'
 const REFRESH_MS = 1100
 

@@ -33,3 +33,9 @@ test('host entry exposes the stable Cordis lifecycle contract', async () => {
   assert.match(source, /ctx\.effect/u)
 })
 
+test('client entry declares every Cordis service it reads', async () => {
+  const source = await readFile(new URL('src/client/index.tsx', root), 'utf8')
+
+  assert.match(source, /export const inject = \['slots'\]/u)
+  assert.match(source, /ctx\.slots/u)
+})

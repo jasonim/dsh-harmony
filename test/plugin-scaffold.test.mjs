@@ -36,6 +36,9 @@ test('DSH package manifest exposes host and browser entry points', async () => {
   assert.equal(manifest.dsh.bundle.patch, './cordis.patch.yml')
   assert.equal(manifest.dsh.client.platform, 'web')
   assert.ok(manifest.dsh.client.inject.includes('@deepseek-ai/dsh-client-runtime'))
+  assert.ok(manifest.dsh.client.inject.includes('@deepseek-ai/dsh-client-ui-slots'))
+  assert.equal(manifest.peerDependencies['@deepseek-ai/dsh-client-ui-slots'], '^0.1.0-rc.6')
+  assert.equal(manifest.devDependencies['@deepseek-ai/dsh-client-ui-slots'], '^0.1.0-rc.6')
 })
 
 test('Cordis patch mounts the stable plugin id', async () => {
@@ -51,4 +54,3 @@ test('v0.1 tool contract is stable and duplicate free', async () => {
   assert.deepEqual(HARMONY_TOOL_NAMES, EXPECTED_TOOLS)
   assert.equal(new Set(HARMONY_TOOL_NAMES).size, HARMONY_TOOL_NAMES.length)
 })
-
