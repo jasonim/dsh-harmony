@@ -27,6 +27,12 @@ test('release carries MIT and upstream attribution', async () => {
   assert.match(notices, /assets\/ocr\.swift/)
 })
 
+test('published package includes the local OCR source used at runtime', async () => {
+  const manifest = JSON.parse(await read('package.json'))
+  assert.ok(manifest.files.includes('assets'))
+  assert.match(await read('assets/ocr.swift'), /Vision/)
+})
+
 test('bundled DSH skill teaches frame-bound and ambiguity-safe operation', async () => {
   const skill = await read('skills/dsh-harmony/SKILL.md')
   assert.match(skill, /^---[\s\S]+name: dsh-harmony/m)
