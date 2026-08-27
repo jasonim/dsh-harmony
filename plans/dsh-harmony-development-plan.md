@@ -1,6 +1,6 @@
 # DSH Harmony 真机插件开发计划
 
-> 状态：已完成资料核对与对抗性审查，待执行  
+> 状态：执行中；WP0 截图/UI tree 门已通过，输入行为门待验证
 > 日期：2026-08-27  
 > 仓库：`dsh-harmony`  
 > 参考实现：[`ZSeven-W/dsh-ios`](https://github.com/ZSeven-W/dsh-ios)，研究基线 `main@9e3b600ba556baf64bbe74ebf39fa1b2ce30545c`
@@ -17,7 +17,7 @@
 - HarmonyOS 官方 `hdc` 提供 USB 设备发现、指定目标、shell、应用安装、文件传输和 HiLog。
 - OpenHarmony ArkXTest 文档提供 `uitest screenCap`、`dumpLayout` 和 `uiInput`。shell 方式的 UI 输入从 UiTest 4.1.2.0 加入；后续版本补充了 hint/description、中文输入优化和按 bundle/window 获取控件树。
 - 官方命令行录屏是“开始录制—停止—拉取 MP4”，不是低延迟交互流。首版侧栏必须以轮询截图实现“实时预览”，不能承诺视频级帧率。
-- 当前开发机已有 DevEco Studio 内置 `hdc 3.2.0c`，但计划编写时 `hdc list targets` 没有返回真机条目。
+- 当前开发机已有 DevEco Studio 内置 `hdc 3.2.0c`。计划编写时未发现真机；实施 WP0 时已在一台 USB 零售真机验证 UiTest 6.0.2.3 的截图和 UI tree。
 
 主要资料：
 
@@ -172,8 +172,8 @@ WP0 可行性与支持契约
 
 ```bash
 node scripts/probe-device.mjs --list
-node scripts/probe-device.mjs --device <connect-key> --all
-node scripts/probe-device.mjs --device <connect-key> --soak 100
+node scripts/probe-device.mjs --device <redacted-device-id> --all
+node scripts/probe-device.mjs --device <redacted-device-id> --soak 100
 ```
 
 #### 退出条件
