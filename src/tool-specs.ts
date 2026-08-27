@@ -67,7 +67,7 @@ const definitions: Record<HarmonyToolName, Definition> = {
   },
   harmony_list_apps: {
     description: 'List installed HarmonyOS bundles with bounded output and an optional case-insensitive filter.',
-    parameters: schema({ device, query: { type: 'string' }, includeSystem: { type: 'boolean', default: false } }),
+    parameters: schema({ device, query: { type: 'string' } }),
   },
   harmony_screenshot: {
     description: 'Capture a fresh PNG frame into the plugin cache and return its frame identity, size, and dimensions.',
@@ -114,7 +114,7 @@ const definitions: Record<HarmonyToolName, Definition> = {
     parameters: schema({ device, resourceId: { type: 'string' }, text: { type: 'string' }, frameId: { type: 'string' } }, ['frameId']),
   },
   harmony_ui_rows: {
-    description: 'Extract visible repeated list rows from a fresh UI tree with indices, aggregate labels, counters, and bounds.',
+    description: 'Extract visible repeated list rows from a fresh UI tree with indices, aggregate descendant labels, and bounds.',
     parameters: schema({ device, maxDepth: { type: 'integer', minimum: 0, maximum: 100 } }),
   },
   harmony_tap_row: {

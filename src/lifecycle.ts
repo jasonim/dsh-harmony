@@ -20,14 +20,14 @@ export interface HostProcessResult {
   exitCode: number | null
 }
 
-function validName(value: string, label: string): string {
+export function validateName(value: string, label: string): string {
   if (!NAME.test(value)) throw new TypeError(`invalid ${label}`)
   return value
 }
 
 export function hvigorArguments(options: Omit<HarmonyBuildArgs, 'projectPath'>): string[] {
-  const module = validName(options.module ?? 'entry', 'module')
-  const product = validName(options.product ?? 'default', 'product')
+  const module = validateName(options.module ?? 'entry', 'module')
+  const product = validateName(options.product ?? 'default', 'product')
   const mode = options.mode ?? 'debug'
   const args = [
     'assembleHap',
@@ -35,7 +35,7 @@ export function hvigorArguments(options: Omit<HarmonyBuildArgs, 'projectPath'>):
     '-p', `module=${module}@${product}`,
     '-p', `product=${product}`,
   ]
-  if (options.target !== undefined) args.push('-p', `target=${validName(options.target, 'target')}`)
+  if (options.target !== undefined) args.push('-p', `target=${validateName(options.target, 'target')}`)
   if (mode === 'release') args.push('-p', 'buildMode=release')
   args.push('--no-daemon', '--no-parallel')
   return args
@@ -79,8 +79,8 @@ export function installCommand(hapPath: string, replaceExisting: boolean): strin
 }
 
 export function launchCommands(bundle: string, ability: string, relaunch: boolean): string[][] {
-  validName(bundle, 'bundle')
-  validName(ability, 'ability')
+  validateName(bundle, 'bundle')
+  validateName(ability, 'ability')
   return [
     ...(relaunch ? [['shell', 'aa', 'force-stop', bundle]] : []),
     ['shell', 'aa', 'start', '-b', bundle, '-a', ability],
@@ -108,6 +108,50 @@ export function boundedLogText(
     lines,
     truncated: lines.length < sourceLines.length,
   }
+}
+
+export function hilogCommand(options: { pid?: number } = {}): string[] {
+  const command = ['shell', 'hilog', '-x', '-z', '300']
+  if (options.pid !== undefined) {
+    if (!Number.isSafeInteger(options.pid) || options.pid < 1) throw new TypeError('pid must be a positive integer')
+    command.push('-P', String(options.pid))
+  }
+  return command
+}
+
+export async function collectLogSnapshots(
+  read: () => Promise<string>,
+  options: {
+    durationMs: number
+    pollMs?: number
+    now?: () => number
+    pause?: (ms: number) => Promise<void>
+  },
+): Promise<string> {
+  const pollMs = options.pollMs ?? 1000
+  if (!Number.isFinite(options.durationMs) || options.durationMs < 0 || options.durationMs > 60_000) {
+    throw new RangeError('durationMs must be between 0 and 60000')
+  }
+  if (!Number.isFinite(pollMs) || pollMs < 50 || pollMs > 10_000) {
+    throw new RangeError('pollMs must be between 50 and 10000')
+  }
+  const now = options.now ?? Date.now
+  const pause = options.pause ?? (ms => new Promise(resolve => setTimeout(resolve, ms)))
+  const deadline = now() + options.durationMs
+  const lines: string[] = []
+  const seen = new Set<string>()
+  do {
+    for (const line of (await read()).split(/\r?\n/u)) {
+      if (line !== '' && !seen.has(line)) {
+        seen.add(line)
+        lines.push(line)
+      }
+    }
+    const remaining = deadline - now()
+    if (remaining <= 0) break
+    await pause(Math.min(pollMs, remaining))
+  } while (now() <= deadline)
+  return lines.join('\n')
 }
 
 async function executable(path: string): Promise<boolean> {

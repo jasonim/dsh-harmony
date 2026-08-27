@@ -5,9 +5,12 @@ import { HarmonyHdcClient } from './hdc.ts'
 import {
   boundedLogText,
   buildHarmonyProject,
+  collectLogSnapshots,
+  hilogCommand,
   installCommand,
   launchCommands,
   parseBundleList,
+  validateName,
   type HarmonyBuildArgs,
 } from './lifecycle.ts'
 import type { HarmonyToolName } from './contracts.ts'
@@ -241,14 +244,32 @@ export class HarmonyRuntime {
 
   async #logs(args: Record<string, unknown>): Promise<Record<string, unknown>> {
     const device = stringArg(args, 'device')
-    const command = ['shell', 'hilog', '-x', '-z', '300']
-    const pid = numberArg(args, 'pid')
-    if (pid !== undefined) command.push('-P', String(Math.round(pid)))
+    const mode = args.mode ?? 'snapshot'
+    if (mode !== 'snapshot' && mode !== 'follow') throw new TypeError('mode must be snapshot or follow')
+    let pid = numberArg(args, 'pid')
+    const bundle = stringArg(args, 'bundle')
+    if (bundle !== undefined) {
+      validateName(bundle, 'bundle')
+      if (pid === undefined) {
+        const found = await this.#client.exec(device, ['shell', 'pidof', bundle])
+        pid = Number(found.stdout.trim().split(/\s+/u)[0])
+        if (!Number.isSafeInteger(pid) || pid! < 1) throw new Error(`bundle ${bundle} is not running`)
+      }
+    }
+    const read = async (): Promise<string> => (await this.#client.exec(device, hilogCommand({ pid }))).stdout
+    const durationSeconds = numberArg(args, 'durationSeconds') ?? 10
+    if (!Number.isInteger(durationSeconds) || durationSeconds < 1 || durationSeconds > 60) {
+      throw new RangeError('durationSeconds must be between 1 and 60')
+    }
+    const source = mode === 'follow'
+      ? await collectLogSnapshots(read, { durationMs: durationSeconds * 1000 })
+      : await read()
     const grep = stringArg(args, 'grep')
-    if (grep !== undefined) command.push('-e', grep)
-    const result = await this.#client.exec(device, command)
-    const bounded = boundedLogText(result.stdout)
-    return { device, mode: args.mode ?? 'snapshot', ...bounded }
+    const filtered = grep === undefined
+      ? source
+      : source.split(/\r?\n/u).filter(line => line.toLocaleLowerCase().includes(grep.toLocaleLowerCase())).join('\n')
+    const bounded = boundedLogText(filtered)
+    return { device, mode, ...(bundle === undefined ? {} : { bundle }), ...(pid === undefined ? {} : { pid }), ...bounded }
   }
 
   async #uiTree(args: Record<string, unknown>): Promise<Record<string, unknown>> {
@@ -347,7 +368,7 @@ export class HarmonyRuntime {
 
   async #appInfo(args: Record<string, unknown>): Promise<Record<string, unknown>> {
     const device = stringArg(args, 'device')
-    const bundle = stringArg(args, 'bundle', true)!
+    const bundle = validateName(stringArg(args, 'bundle', true)!, 'bundle')
     const result = await this.#client.exec(device, ['shell', 'bm', 'dump', '-n', bundle])
     return { device, bundle, info: boundedLogText(result.stdout, { maxLines: 200, maxBytes: 30 * 1024 }).text }
   }
