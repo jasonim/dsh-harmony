@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, mkdir, realpath, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, test } from 'node:test'
@@ -25,7 +25,7 @@ describe('Harmony lifecycle helpers', () => {
       await writeFile(join(root, 'oh_modules', 'bad', 'ignored.hap'), 'hap')
       const { findBuiltHap } = await import('../src/lifecycle.ts')
 
-      assert.equal(await findBuiltHap(root), wanted)
+      assert.equal(await findBuiltHap(root), await realpath(wanted))
     } finally {
       await rm(root, { recursive: true, force: true })
     }
@@ -61,4 +61,3 @@ describe('Harmony lifecycle helpers', () => {
     assert.equal(bounded.truncated, true)
   })
 })
-
