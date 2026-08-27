@@ -52,7 +52,12 @@ describe('Harmony lifecycle helpers', () => {
   })
 
   test('builds safe install and launch commands without implicit replacement', async () => {
-    const { installCommand, launchCommands } = await import('../src/lifecycle.ts')
+    const {
+      assertAbilityCommandSucceeded,
+      assertInstallCommandSucceeded,
+      installCommand,
+      launchCommands,
+    } = await import('../src/lifecycle.ts')
 
     assert.deepEqual(installCommand('/tmp/app.hap', false), ['app', 'install', '/tmp/app.hap'])
     assert.deepEqual(installCommand('/tmp/app.hap', true), ['app', 'install', '-r', '/tmp/app.hap'])
@@ -61,6 +66,16 @@ describe('Harmony lifecycle helpers', () => {
       ['shell', 'aa', 'start', '-b', 'com.example.app', '-a', 'EntryAbility'],
     ])
     assert.throws(() => launchCommands('com.example.app;rm', 'EntryAbility', false), /invalid bundle/u)
+    assert.doesNotThrow(() => assertInstallCommandSucceeded('[Info] msg:successfully'))
+    assert.throws(
+      () => assertInstallCommandSucceeded('msg:error: failed to install bundle. code:9568257'),
+      /install failed/u,
+    )
+    assert.doesNotThrow(() => assertAbilityCommandSucceeded('start ability successfully.'))
+    assert.throws(
+      () => assertAbilityCommandSucceeded('error: failed to start ability. Error Code:10104001'),
+      /ability command failed/u,
+    )
   })
 
   test('bounds HiLog output by lines and bytes', async () => {
