@@ -15,7 +15,7 @@
   capability 自动续期。
 - 确定性 HarmonyOS 测试 HAP 通过当前 DevEco SDK/Hvigor 的真实编译；
   插件 `harmony_build` 路径在不预设 `NODE_HOME`/`DEVECO_SDK_HOME` 时也通过。
-- 93/93 自动化测试通过；总行覆盖率 84.35%，函数覆盖率 81.64%。
+- 93/93 自动化测试通过；总行覆盖率 84.43%，函数覆盖率 81.78%。
 - host/client 正式构建通过；npm tarball 包含 host、client、OCR Swift source、
   内置技能、MIT 许可证和上游 notice。
 - tarball 已安装到 DSH web profile；最终候选启动于随机 loopback 端口，根
