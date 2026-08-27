@@ -12,13 +12,19 @@ import {
 } from './probe-runner.mjs'
 
 const DEFAULT_COMMAND_OPTIONS = Object.freeze({ timeoutMs: 10_000, maxBytes: 256 * 1024 })
+const HDC_LIST_OPTIONS = Object.freeze({ timeoutMs: 25_000, maxBytes: 256 * 1024 })
+const HDC_FAILURE_PATTERN = /(?:^|\n)(?:\[Fail\]|Connect server failed|Device not found(?:ed)?|ExecuteCommand need connect-key|Unknown operation command)/iu
 
 function hdcVersionOf(output) {
   return String(output ?? '').match(/\bVer:\s*([^\s,]+)/u)?.[1]
 }
 
 function commandSucceeded(result) {
-  return result.exitCode === 0 && result.signal === null
+  return (
+    result.exitCode === 0
+    && result.signal === null
+    && !HDC_FAILURE_PATTERN.test(`${result.stdout}\n${result.stderr}`)
+  )
 }
 
 function commandListed(output, command) {
@@ -31,13 +37,16 @@ async function executeHdc(execute, hdcBinary, args, options = DEFAULT_COMMAND_OP
 }
 
 async function inventory({ hdcBinary, execute }) {
-  const [versionResult, targetsResult] = await Promise.all([
-    executeHdc(execute, hdcBinary, ['-v']),
-    executeHdc(execute, hdcBinary, ['list', 'targets', '-v']),
-  ])
+  const versionResult = await executeHdc(execute, hdcBinary, ['-v'])
   if (!commandSucceeded(versionResult)) {
     throw new ProbeProcessError('HDC_VERSION_FAILED', 'Unable to read the HDC version')
   }
+  const targetsResult = await executeHdc(
+    execute,
+    hdcBinary,
+    ['list', 'targets', '-v'],
+    HDC_LIST_OPTIONS,
+  )
   if (!commandSucceeded(targetsResult)) {
     throw new ProbeProcessError('HDC_LIST_FAILED', 'Unable to list HDC targets')
   }
