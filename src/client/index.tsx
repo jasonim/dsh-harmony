@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 import type { ToolCallViewProps } from '@deepseek-ai/dsh-client-ui-tool/client'
-import { normalizedPoint, parseHarmonyResult } from './protocol.ts'
+import { grantNeedsRefresh, normalizedPoint, parseHarmonyResult } from './protocol.ts'
 
 export const name = 'dsh-harmony-client'
 const GRANT_PATH = '/_dsh/dsh-harmony/grant'
@@ -18,6 +18,7 @@ function HarmonyDeviceCard(props: ToolCallViewProps): React.JSX.Element {
   const source = useMemo(() => parseHarmonyResult(props.block), [props.block])
   const [open, setOpen] = useState(false)
   const [grant, setGrant] = useState<Grant>()
+  const [grantEpoch, setGrantEpoch] = useState(0)
   const [frameId, setFrameId] = useState(source?.frameId)
   const [imageUrl, setImageUrl] = useState<string>()
   const [error, setError] = useState<string>()
@@ -37,22 +38,38 @@ function HarmonyDeviceCard(props: ToolCallViewProps): React.JSX.Element {
       if (!response.ok) throw new Error(`grant failed (${response.status})`)
       return response.json() as Promise<Grant>
     }).then(value => {
-      if (active) setGrant(value)
+      if (active) {
+        setGrant(value)
+        setError(undefined)
+      }
     }).catch(reason => {
       if (active) setError(reason instanceof Error ? reason.message : String(reason))
     })
     return () => { active = false }
-  }, [open, props.callId, props.sessionId, source])
+  }, [grantEpoch, open, props.callId, props.sessionId, source])
 
   useEffect(() => {
     if (!open || grant === undefined) return
     let active = true
     let timer: ReturnType<typeof setTimeout> | undefined
     const capture = async (): Promise<void> => {
+      let repeat = true
       try {
+        if (grantNeedsRefresh(grant.expiresAt)) {
+          repeat = false
+          setGrant(undefined)
+          setGrantEpoch(value => value + 1)
+          return
+        }
         const response = await fetch(grant.captureUrl, {
           method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}',
         })
+        if (response.status === 401) {
+          repeat = false
+          setGrant(undefined)
+          setGrantEpoch(value => value + 1)
+          return
+        }
         if (!response.ok) throw new Error(`capture failed (${response.status})`)
         const value = await response.json() as { frame?: { frameId?: string } }
         if (!active) return
@@ -62,7 +79,7 @@ function HarmonyDeviceCard(props: ToolCallViewProps): React.JSX.Element {
       } catch (reason) {
         if (active) setError(reason instanceof Error ? reason.message : String(reason))
       } finally {
-        if (active) timer = setTimeout(() => { void capture() }, REFRESH_MS)
+        if (active && repeat) timer = setTimeout(() => { void capture() }, REFRESH_MS)
       }
     }
     void capture()
@@ -77,7 +94,10 @@ function HarmonyDeviceCard(props: ToolCallViewProps): React.JSX.Element {
     const response = await fetch(grant.controlUrl, {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload),
     })
-    if (!response.ok) setError(`control failed (${response.status})`)
+    if (response.status === 401) {
+      setGrant(undefined)
+      setGrantEpoch(value => value + 1)
+    } else if (!response.ok) setError(`control failed (${response.status})`)
   }
 
   if (source === undefined) return <div style={{ padding: 10, color: '#8b949e' }}>HarmonyOS tool result</div>
@@ -145,4 +165,4 @@ export function apply(ctx: ClientContext): void {
   }
 }
 
-export { normalizedPoint, parseHarmonyResult, type HarmonyPanelSource } from './protocol.ts'
+export { grantNeedsRefresh, normalizedPoint, parseHarmonyResult, type HarmonyPanelSource } from './protocol.ts'

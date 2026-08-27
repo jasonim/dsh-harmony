@@ -44,3 +44,8 @@ export function normalizedPoint(
     y: clamp((point.clientY - rect.top) / rect.height),
   }
 }
+
+export function grantNeedsRefresh(expiresAt: number, now = Date.now(), skewMs = 5_000): boolean {
+  if (!Number.isFinite(expiresAt) || !Number.isFinite(now) || !Number.isFinite(skewMs) || skewMs < 0) return true
+  return expiresAt - now <= skewMs
+}
