@@ -6,13 +6,21 @@ import { describe, test } from 'node:test'
 
 describe('Harmony lifecycle helpers', () => {
   test('builds explicit bounded Hvigor arguments', async () => {
-    const { hvigorArguments } = await import('../src/lifecycle.ts')
+    const { hostProcessEnvironment, hvigorArguments } = await import('../src/lifecycle.ts')
 
     assert.deepEqual(hvigorArguments({ module: 'entry', product: 'default', mode: 'debug' }), [
       'assembleHap', '--mode', 'module', '-p', 'module=entry@default', '-p', 'product=default',
       '--no-daemon', '--no-parallel',
     ])
     assert.throws(() => hvigorArguments({ module: '../entry', product: 'default' }), /invalid module/u)
+    assert.equal(
+      hostProcessEnvironment({ PATH: '/usr/bin' }, '/opt/node/bin/node').NODE_HOME,
+      '/opt/node',
+    )
+    assert.equal(
+      hostProcessEnvironment({ NODE_HOME: '/custom/node' }, '/opt/node/bin/node').NODE_HOME,
+      '/custom/node',
+    )
   })
 
   test('finds one HAP while ignoring dependency and cache directories', async () => {
