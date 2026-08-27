@@ -58,12 +58,22 @@ describe('runListProbe', () => {
 describe('runDeviceProbe', () => {
   it('combines command, screenshot, and tree capabilities into a redacted report', async () => {
     const { execute, calls } = createFakeExecute()
+    let activeArtifacts = 0
+    let maxActiveArtifacts = 0
     const screenshotProbe = async ({ target }) => {
       assert.equal(target.connectKey, 'SERIAL-ONE')
+      activeArtifacts += 1
+      maxActiveArtifacts = Math.max(maxActiveArtifacts, activeArtifacts)
+      await new Promise(resolve => setImmediate(resolve))
+      activeArtifacts -= 1
       return { available: true, bytes: 1234, width: 1260, height: 2720, durationMs: 80 }
     }
     const treeProbe = async ({ target }) => {
       assert.equal(target.connectKey, 'SERIAL-ONE')
+      activeArtifacts += 1
+      maxActiveArtifacts = Math.max(maxActiveArtifacts, activeArtifacts)
+      await new Promise(resolve => setImmediate(resolve))
+      activeArtifacts -= 1
       return { available: true, bytes: 2048, parseableJson: true, durationMs: 90 }
     }
 
@@ -92,6 +102,7 @@ describe('runDeviceProbe', () => {
     })
     assert.equal(report.screenshot.available, true)
     assert.equal(report.uiTree.available, true)
+    assert.equal(maxActiveArtifacts, 1)
     assert.equal(JSON.stringify(report).includes('SERIAL-ONE'), false)
     assert.ok(calls.every(args => Array.isArray(args)))
   })
