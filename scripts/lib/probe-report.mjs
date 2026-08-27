@@ -1,4 +1,8 @@
-import { classifyUiTestCapabilities, parseHdcTargets } from './probe-core.mjs'
+import {
+  classifyUiTestCapabilities,
+  parseHdcTargets,
+  summarizeDurations,
+} from './probe-core.mjs'
 import {
   ProbeProcessError,
   extractUiTestVersion,
@@ -128,10 +132,8 @@ export async function runDeviceProbe({
   const target = resolveTarget(targets, reference)
   const context = { hdcBinary, execute, target }
   const uiTest = await uiTestReport(context)
-  const [screenshot, uiTree] = await Promise.all([
-    safeArtifactProbe(screenshotProbe, context, 'SCREENSHOT_PROBE_FAILED'),
-    safeArtifactProbe(treeProbe, context, 'UI_TREE_PROBE_FAILED'),
-  ])
+  const screenshot = await safeArtifactProbe(screenshotProbe, context, 'SCREENSHOT_PROBE_FAILED')
+  const uiTree = await safeArtifactProbe(treeProbe, context, 'UI_TREE_PROBE_FAILED')
 
   return {
     schemaVersion: 1,
@@ -142,5 +144,47 @@ export async function runDeviceProbe({
     uiTest,
     screenshot,
     uiTree,
+  }
+}
+
+export async function runSoakProbe({
+  hdcBinary,
+  reference,
+  iterations,
+  execute = runProcess,
+  screenshotProbe,
+}) {
+  if (!Number.isSafeInteger(iterations) || iterations < 1 || iterations > 500) {
+    throw new RangeError('iterations must be between 1 and 500')
+  }
+  const { hdcVersion, targets } = await inventory({ hdcBinary, execute })
+  const target = resolveTarget(targets, reference)
+  const context = { hdcBinary, execute, target }
+  const durations = []
+  let failureCount = 0
+
+  for (let index = 0; index < iterations; index += 1) {
+    const screenshot = await safeArtifactProbe(
+      screenshotProbe,
+      context,
+      'SCREENSHOT_PROBE_FAILED',
+    )
+    if (screenshot.available && Number.isFinite(screenshot.durationMs)) {
+      durations.push(screenshot.durationMs)
+    } else {
+      failureCount += 1
+    }
+  }
+
+  return {
+    schemaVersion: 1,
+    mode: 'soak',
+    generatedAt: new Date().toISOString(),
+    host: { hdcVersion },
+    device: publicTarget(target),
+    iterations,
+    successCount: durations.length,
+    failureCount,
+    durations: summarizeDurations(durations),
   }
 }
