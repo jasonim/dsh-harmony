@@ -42,7 +42,8 @@
     "build:client": "node scripts/run-tool.mjs tsc -p tsconfig.client.json && node scripts/run-tool.mjs tsdown src/client/index.tsx --format cjs --platform browser --target es2022 --tsconfig tsconfig.client.json --deps.never-bundle react --deps.never-bundle react/jsx-runtime --deps.never-bundle react-dom --deps.never-bundle react-dom/client --out-dir .client-build --clean --sourcemap --logLevel warn && node scripts/build-client.mjs",
     "typecheck": "node scripts/run-tool.mjs tsc -p tsconfig.json && node scripts/run-tool.mjs tsc -p tsconfig.client.json",
     "test": "node --test test/*.test.mjs",
-    "test:coverage": "node --test --experimental-test-coverage test/*.test.mjs"
+    "test:coverage": "node --test --experimental-test-coverage test/*.test.mjs",
+    "test:device": "node scripts/device-input-gate.mjs"
   },
   "packageManager": "pnpm@9.7.1",
   "peerDependencies": {
