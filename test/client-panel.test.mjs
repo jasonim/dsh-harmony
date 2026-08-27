@@ -18,7 +18,7 @@ test('hydrates a panel source from durable DSH JSON output', async () => {
 })
 
 test('maps pointer coordinates into normalized image space', async () => {
-  const { normalizedPoint } = await import('../src/client/protocol.ts')
+  const { grantNeedsRefresh, normalizedPoint } = await import('../src/client/protocol.ts')
 
   assert.deepEqual(
     normalizedPoint({ clientX: 150, clientY: 250 }, { left: 100, top: 100, width: 200, height: 300 }),
@@ -28,6 +28,8 @@ test('maps pointer coordinates into normalized image space', async () => {
     normalizedPoint({ clientX: 0, clientY: 999 }, { left: 100, top: 100, width: 200, height: 300 }),
     { x: 0, y: 1 },
   )
+  assert.equal(grantNeedsRefresh(20_000, 10_000), false)
+  assert.equal(grantNeedsRefresh(14_000, 10_000), true)
 })
 
 test('client panel uses signed grant, capture, frame, and control routes', async () => {
@@ -37,6 +39,7 @@ test('client panel uses signed grant, capture, frame, and control routes', async
   assert.match(source, /captureUrl/u)
   assert.match(source, /controlUrl/u)
   assert.match(source, /1100/u)
+  assert.match(source, /grantEpoch/u)
+  assert.match(source, /expiresAt/u)
   assert.match(source, /tool\.call\.toolview/u)
 })
-
