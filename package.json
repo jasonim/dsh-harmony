@@ -1,0 +1,59 @@
+{
+  "name": "dsh-harmony",
+  "version": "0.1.0-rc.1",
+  "description": "DeepSeek Harness plugin for a USB-connected HarmonyOS device, powered by HDC and UiTest.",
+  "license": "MIT",
+  "keywords": [
+    "dsh",
+    "harmonyos",
+    "hdc",
+    "uitest",
+    "plugin"
+  ],
+  "type": "module",
+  "engines": {
+    "node": ">=23.11.0"
+  },
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "types": "./lib/types/client/index.d.ts",
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "src",
+    "scripts",
+    "skills",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "test:coverage": "node --test --experimental-test-coverage test/*.test.mjs"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-tool",
+        "@deepseek-ai/dsh-client-ui-theme"
+      ],
+      "platform": "web"
+    }
+  }
+}

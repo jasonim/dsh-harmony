@@ -1,0 +1,4 @@
+# DSH Harmony bundle patch. Profile-level patches may override this row by id.
+- insert:
+    - id: dsh-harmony
+      name: 'dsh-harmony'
