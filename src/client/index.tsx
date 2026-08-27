@@ -149,13 +149,16 @@ function HarmonyLivePanel(props: { source: HarmonyPanelSource; onClose(): void }
         <button type="button" onClick={() => { void control({ action: 'button', name: 'home' }) }}>Home</button>
         <button type="button" onClick={onClose}>关闭</button>
       </header>
-      <div style={{ flex: 1, minHeight: 0, display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
+      <div style={{ flex: 1, minHeight: 0, position: 'relative', overflow: 'hidden' }}>
         {imageUrl === undefined ? <span>正在连接真机…</span> : (
           <img
             src={imageUrl}
             alt="HarmonyOS live preview"
             draggable={false}
-            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', touchAction: 'none', userSelect: 'none' }}
+            style={{
+              position: 'absolute', inset: 0, width: '100%', height: '100%',
+              objectFit: 'contain', touchAction: 'none', userSelect: 'none',
+            }}
             onPointerDown={event => {
               pointer.current = normalizedPoint(event, event.currentTarget.getBoundingClientRect())
               event.currentTarget.setPointerCapture(event.pointerId)

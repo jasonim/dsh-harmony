@@ -54,6 +54,7 @@ test('tall device frames are contained by both panel axes instead of clipped by 
 
   assert.match(source, /position: 'relative'.*overflow: 'hidden'/u)
   assert.match(source, /position: 'absolute', inset: 0/u)
-  assert.match(source, /width: '100%', height: '100%', objectFit: 'contain'/u)
+  assert.match(source, /width: '100%', height: '100%'/u)
+  assert.match(source, /objectFit: 'contain'/u)
   assert.doesNotMatch(source, /maxWidth: '100%', maxHeight: '100%'/u)
 })
