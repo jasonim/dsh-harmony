@@ -21,6 +21,11 @@ describe('Harmony lifecycle helpers', () => {
       hostProcessEnvironment({ NODE_HOME: '/custom/node' }, '/opt/node/bin/node').NODE_HOME,
       '/custom/node',
     )
+    assert.equal(
+      hostProcessEnvironment({}, '/opt/node/bin/node', 'darwin').DEVECO_SDK_HOME,
+      '/Applications/DevEco-Studio.app/Contents/sdk',
+    )
+    assert.equal(hostProcessEnvironment({}, '/opt/node/bin/node', 'linux').DEVECO_SDK_HOME, undefined)
   })
 
   test('finds one HAP while ignoring dependency and cache directories', async () => {
