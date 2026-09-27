@@ -1,0 +1,303 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Agent = Model + Harness",
+    "locale": "zh-CN",
+    "output": "agent-model-harness.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/deepseek-ai/deepseek-harness",
+      "revision": "76fda729799fe9b3848dbe2c211d4b231032b81e"
+    },
+    "viewBox": [1380, 760]
+  },
+  "components": [
+    {
+      "id": "model",
+      "type": "external",
+      "label": "Model",
+      "sublabel": "推理与生成",
+      "pos": [20, 320],
+      "size": [150, 76]
+    },
+    {
+      "id": "agent",
+      "type": "backend",
+      "label": "Agent",
+      "sublabel": "Model + Harness",
+      "tag": "持续工作",
+      "pos": [1180, 316],
+      "size": [170, 84],
+      "sources": [
+        {
+          "path": "docs/architecture.zh.md",
+          "label": "Agent 生命周期"
+        }
+      ]
+    },
+    {
+      "id": "cordis",
+      "type": "backend",
+      "label": "Cordis 内核",
+      "sublabel": "加载 · 卸载 · 依赖",
+      "pos": [220, 150],
+      "size": [165, 72],
+      "sources": [
+        {
+          "path": "docs/architecture.zh.md",
+          "label": "插件内核"
+        }
+      ]
+    },
+    {
+      "id": "modelAdapter",
+      "type": "cloud",
+      "label": "模型适配",
+      "sublabel": "Provider / LLM Stream",
+      "pos": [220, 320],
+      "size": [165, 76],
+      "sources": [
+        {
+          "path": "docs/user/develop/practice/llm-adapter.zh.md",
+          "label": "LLM Adapter"
+        }
+      ]
+    },
+    {
+      "id": "skills",
+      "type": "frontend",
+      "label": "Skills",
+      "sublabel": "知识与工作流纪律",
+      "pos": [465, 150],
+      "size": [160, 72],
+      "sources": [
+        {
+          "path": "docs/subsystems/skills.zh.md",
+          "label": "Skills 子系统"
+        }
+      ]
+    },
+    {
+      "id": "agentLoop",
+      "type": "backend",
+      "label": "Agent Loop",
+      "sublabel": "观察 · 决策 · 执行 · 验证",
+      "tag": "运行主轴",
+      "pos": [450, 320],
+      "size": [190, 76],
+      "sources": [
+        {
+          "path": "docs/architecture.zh.md",
+          "label": "轮次流程"
+        }
+      ]
+    },
+    {
+      "id": "ui",
+      "type": "frontend",
+      "label": "UI",
+      "sublabel": "对话 · Trajectory · 设置",
+      "pos": [700, 150],
+      "size": [170, 72],
+      "sources": [
+        {
+          "path": "docs/subsystems/web-client.zh.md",
+          "label": "Web Client"
+        }
+      ]
+    },
+    {
+      "id": "tools",
+      "type": "backend",
+      "label": "Tools",
+      "sublabel": "连接环境与外部能力",
+      "pos": [700, 320],
+      "size": [170, 76],
+      "sources": [
+        {
+          "path": "docs/subsystems/tools.zh.md",
+          "label": "工具子系统"
+        }
+      ]
+    },
+    {
+      "id": "sandbox",
+      "type": "security",
+      "label": "Sandbox",
+      "sublabel": "权限与受控执行",
+      "pos": [930, 320],
+      "size": [165, 76],
+      "sources": [
+        {
+          "path": "docs/subsystems/sandbox.zh.md",
+          "label": "沙箱子系统"
+        }
+      ]
+    },
+    {
+      "id": "session",
+      "type": "messagebus",
+      "label": "Session",
+      "sublabel": "仅追加事件日志",
+      "pos": [465, 500],
+      "size": [160, 72],
+      "sources": [
+        {
+          "path": "docs/subsystems/session.zh.md",
+          "label": "会话日志"
+        }
+      ]
+    },
+    {
+      "id": "storage",
+      "type": "database",
+      "label": "Storage",
+      "sublabel": "持久化 · 恢复 · 回放",
+      "pos": [700, 500],
+      "size": [170, 72],
+      "sources": [
+        {
+          "path": "docs/subsystems/storage.zh.md",
+          "label": "存储子系统"
+        }
+      ]
+    },
+    {
+      "id": "scheduler",
+      "type": "cloud",
+      "label": "调度",
+      "sublabel": "定时触发与持续运行",
+      "pos": [220, 500],
+      "size": [170, 72],
+      "sources": [
+        {
+          "path": "docs/subsystems/schedule.zh.md",
+          "label": "调度子系统"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "DeepSeek Harness · 一切皆插件",
+      "wraps": [
+        "cordis",
+        "modelAdapter",
+        "skills",
+        "agentLoop",
+        "ui",
+        "tools",
+        "sandbox",
+        "session",
+        "storage",
+        "scheduler"
+      ],
+      "pad": 34
+    }
+  ],
+  "connections": [
+    {
+      "id": "modelInference",
+      "from": "model",
+      "to": "modelAdapter",
+      "label": "推理 I/O",
+      "variant": "emphasis"
+    },
+    {
+      "id": "adapterStream",
+      "from": "modelAdapter",
+      "to": "agentLoop",
+      "label": "模型流",
+      "variant": "emphasis"
+    },
+    {
+      "id": "cordisComposition",
+      "from": "cordis",
+      "to": "modelAdapter",
+      "label": "加载 / 卸载",
+      "labelAt": [303, 270]
+    },
+    {
+      "id": "skillsContext",
+      "from": "skills",
+      "to": "agentLoop",
+      "label": "上下文与策略",
+      "labelAt": [545, 270]
+    },
+    {
+      "id": "uiInteraction",
+      "from": "ui",
+      "to": "tools",
+      "label": "调用展示",
+      "labelAt": [785, 270]
+    },
+    {
+      "id": "toolCalls",
+      "from": "agentLoop",
+      "to": "tools",
+      "label": "工具调用",
+      "variant": "emphasis"
+    },
+    {
+      "id": "sandboxExecution",
+      "from": "tools",
+      "to": "sandbox",
+      "label": "受控执行",
+      "variant": "security"
+    },
+    {
+      "id": "actionableAgent",
+      "from": "sandbox",
+      "to": "agent",
+      "label": "环境行动",
+      "variant": "emphasis"
+    },
+    {
+      "id": "sessionEvents",
+      "from": "session",
+      "to": "agentLoop",
+      "label": "读取 / 追加事件"
+    },
+    {
+      "id": "sessionPersistence",
+      "from": "session",
+      "to": "storage",
+      "label": "持久化 / 恢复"
+    },
+    {
+      "id": "scheduledWake",
+      "from": "scheduler",
+      "to": "session",
+      "label": "定时唤醒",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Model",
+      "items": [
+        "负责推理与生成",
+        "通过模型适配插件接入 Harness"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Harness",
+      "items": [
+        "工具、技能、会话、沙箱、存储、循环、调度与 UI 均由插件提供",
+        "Cordis 只负责加载、卸载和依赖关系"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Agent",
+      "items": [
+        "模型给出智能，Harness 给出环境理解与行动能力",
+        "运行过程进入会话日志，可恢复、分叉、检索与回放"
+      ]
+    }
+  ]
+}

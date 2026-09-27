@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "一次真机操作：从指令到结果验证",
+    "locale": "zh-CN",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    { "id": "agent", "type": "backend", "label": "Agent 发起工具调用", "sublabel": "按 Skill 选择工具与调用顺序", "pos": [70, 60], "size": [260, 100] },
+    { "id": "runtime", "type": "backend", "label": "插件统一处理", "sublabel": "检查目标、参数与画面编号", "tag": "Tools + HarmonyRuntime", "pos": [430, 60], "size": [260, 100] },
+    { "id": "commands", "type": "backend", "label": "生成受控设备命令", "sublabel": "指定设备 · 排队执行 · 超时", "tag": "Controller + HDC", "pos": [790, 60], "size": [260, 100] },
+    { "id": "phone", "type": "external", "label": "HarmonyOS 真机", "sublabel": "执行点击、滑动等操作", "pos": [790, 240], "size": [260, 100] },
+    { "id": "panel", "type": "frontend", "label": "用户操作右侧面板", "sublabel": "点击 · 拖动 · Back / Home", "pos": [70, 240], "size": [260, 100] },
+    { "id": "gate", "type": "security", "label": "浏览器入口校验", "sublabel": "检查请求来源与短期授权", "tag": "同源 Routes + capability", "pos": [430, 240], "size": [260, 100] },
+    { "id": "verify", "type": "backend", "label": "Agent 检查操作结果", "sublabel": "查看新截图，必要时查文字或日志", "pos": [430, 420], "size": [260, 100] },
+    { "id": "effect", "type": "backend", "label": "获取操作后的画面", "sublabel": "短暂等待后重新截图", "tag": "新 frameId", "pos": [790, 420], "size": [260, 100] }
+  ],
+  "connections": [
+    { "from": "agent", "to": "runtime", "variant": "emphasis" },
+    { "from": "runtime", "to": "commands", "variant": "emphasis" },
+    { "from": "commands", "to": "phone", "label": "USB", "variant": "emphasis", "labelAt": [920, 174] },
+    { "from": "phone", "to": "effect", "label": "操作后重新观察", "variant": "emphasis", "labelAt": [920, 354] },
+    { "from": "effect", "to": "verify", "label": "工具结果", "variant": "emphasis" },
+    { "from": "panel", "to": "gate" },
+    { "from": "gate", "to": "runtime", "label": "复用同一套执行逻辑", "variant": "security" }
+  ]
+}

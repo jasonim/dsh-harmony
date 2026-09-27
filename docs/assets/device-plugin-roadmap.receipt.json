@@ -1,0 +1,24 @@
+{
+  "diagram_type": "architecture",
+  "purpose": "章节中的设备插件实现路线图：3 个阶段，9 个步骤",
+  "specification": {
+    "path": "device-plugin-roadmap.archify.json",
+    "sha256": "d7fe33f355868612123f74c246608153050a1eaae199684f1f1752fc5480f114",
+    "bytes": 3005
+  },
+  "artifact": {
+    "path": "device-plugin-roadmap.html",
+    "sha256": "687235af8def3582c9b780360b3fe4938cfe71b0614c37f6223e3dffe4221448",
+    "bytes": 711774
+  },
+  "validation": { "profile": "showcase", "checksPassed": 9, "checkCount": 9, "errors": 0, "warnings": 0 },
+  "visual_evidence": "device-plugin-roadmap.visual-check.json",
+  "visual_review": "passed",
+  "reviewed_screenshots": [
+    "device-plugin-roadmap.visual-check.1440x900.light.png",
+    "device-plugin-roadmap.visual-check.1440x900.dark.png",
+    "device-plugin-roadmap.visual-check.2048x1320.light.png",
+    "device-plugin-roadmap.visual-check.2048x1320.dark.png"
+  ],
+  "correction_rounds": 1
+}

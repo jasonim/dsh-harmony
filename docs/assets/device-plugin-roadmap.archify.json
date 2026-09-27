@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "从零实现设备插件：9 步路线图",
+    "locale": "zh-CN",
+    "quality_profile": "showcase"
+  },
+  "boundaries": [
+    { "kind": "region", "label": "A · 打好基础", "wraps": ["scope", "probe", "skeleton"], "pad": 30 },
+    { "kind": "region", "label": "B · 建立控制", "wraps": ["transport", "tools", "frame"], "pad": 30 },
+    { "kind": "region", "label": "C · 验证交付", "wraps": ["browser_gate", "semantics", "release"], "pad": 30 }
+  ],
+  "components": [
+    { "id": "scope", "type": "security", "label": "0 · 定义支持边界", "sublabel": "支持契约与威胁模型", "tag": "哪些设备，允许哪些动作", "pos": [70, 60], "size": [260, 100] },
+    { "id": "probe", "type": "backend", "label": "1 · 探测只读能力", "sublabel": "设备 · 截图 · 控件树 · 日志", "tag": "先确认看得见", "pos": [430, 60], "size": [260, 100] },
+    { "id": "skeleton", "type": "backend", "label": "2 · 跑通插件骨架", "sublabel": "Cordis 加载、注册与卸载", "tag": "无设备也能正常加载", "pos": [790, 60], "size": [260, 100] },
+    { "id": "transport", "type": "backend", "label": "3 · 封装设备通信", "sublabel": "目标选择 · 超时 · 串行队列", "tag": "产出：受控传输层", "pos": [790, 240], "size": [260, 100] },
+    { "id": "tools", "type": "backend", "label": "4 · 拆分原子工具", "sublabel": "构建 / 安装 / 启动 / 观察 / 输入", "tag": "每个工具可独立验证", "pos": [430, 240], "size": [260, 100] },
+    { "id": "frame", "type": "frontend", "label": "5 · 对齐画面与操作", "sublabel": "frameId 与过期帧拒绝", "tag": "再做预览与交互 UI", "pos": [70, 240], "size": [260, 100] },
+    { "id": "browser_gate", "type": "security", "label": "6 · 保护浏览器入口", "sublabel": "同源校验与短期 capability", "tag": "限制调用与文件访问范围", "pos": [70, 420], "size": [260, 100] },
+    { "id": "semantics", "type": "backend", "label": "7 · 补齐语义与 Skill", "sublabel": "控件树 → OCR → 坐标", "tag": "把调用顺序写成操作规范", "pos": [430, 420], "size": [260, 100] },
+    { "id": "release", "type": "security", "label": "8 · 分层验证与发布", "sublabel": "单测 → 集成 → 真机", "tag": "公开支持范围与未验证项", "pos": [790, 420], "size": [260, 100] }
+  ],
+  "connections": [
+    { "from": "scope", "to": "probe", "variant": "emphasis" },
+    { "from": "probe", "to": "skeleton", "variant": "emphasis" },
+    { "from": "skeleton", "to": "transport", "variant": "emphasis" },
+    { "from": "transport", "to": "tools", "variant": "emphasis" },
+    { "from": "tools", "to": "frame", "variant": "emphasis" },
+    { "from": "frame", "to": "browser_gate", "variant": "emphasis" },
+    { "from": "browser_gate", "to": "semantics", "variant": "emphasis" },
+    { "from": "semantics", "to": "release", "variant": "emphasis" }
+  ]
+}

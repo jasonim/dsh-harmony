@@ -1,0 +1,178 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "DSH Harmony 运行时架构",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [1360, 720],
+    "views": [
+      {
+        "id": "agent-tools",
+        "label": "Agent 工具链",
+        "focus": ["dsh-agent", "plugin-entry", "runtime", "device-io", "usb-device"],
+        "note": "追踪 Agent 工具调用从 Cordis 注册到 USB 真机指令的完整路径。"
+      },
+      {
+        "id": "web-panel",
+        "label": "Web 面板链",
+        "focus": ["web-panel", "stream-routes", "stream-access", "runtime", "device-io", "frame-cache"],
+        "note": "查看 capability 保护下的截图、画面读取与 frame-bound 控制。"
+      },
+      {
+        "id": "host-helpers",
+        "label": "Host 本地辅助链",
+        "focus": ["runtime", "hvigor-runner", "vision-ocr", "frame-cache"],
+        "note": "查看仅在 Host 侧运行的构建、OCR 与受限 artifact 分支。"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "dsh-agent",
+      "type": "external",
+      "label": "Agent + DSH Tools",
+      "sublabel": "JSON 工具调用 / 结果",
+      "pos": [40, 310],
+      "size": [175, 72]
+    },
+    {
+      "id": "plugin-entry",
+      "type": "backend",
+      "label": "Cordis 插件入口",
+      "sublabel": "apply() + tool 注册",
+      "tag": "18 个 tools",
+      "pos": [270, 310],
+      "size": [190, 72]
+    },
+    {
+      "id": "runtime",
+      "type": "backend",
+      "label": "HarmonyRuntime",
+      "sublabel": "参数校验 + 分派 + 编排",
+      "tag": "单一 runtime",
+      "pos": [535, 310],
+      "size": [205, 72]
+    },
+    {
+      "id": "device-io",
+      "type": "backend",
+      "label": "Device I/O 子系统",
+      "sublabel": "Controller + HarmonyHdcClient",
+      "tag": "按设备串行",
+      "pos": [825, 310],
+      "size": [220, 72]
+    },
+    {
+      "id": "usb-device",
+      "type": "external",
+      "label": "HarmonyOS 真机",
+      "sublabel": "已解锁实体设备",
+      "tag": "USB + Connected",
+      "pos": [1135, 310],
+      "size": [195, 72]
+    },
+    {
+      "id": "web-panel",
+      "type": "frontend",
+      "label": "React 真机面板",
+      "sublabel": "轮询预览 + 指针输入",
+      "tag": "约 1.1 秒轮询",
+      "pos": [40, 80],
+      "size": [205, 72]
+    },
+    {
+      "id": "stream-routes",
+      "type": "backend",
+      "label": "同源 Stream Routes",
+      "sublabel": "grant / frame / capture / control",
+      "tag": "仅 loopback",
+      "pos": [315, 80],
+      "size": [225, 72]
+    },
+    {
+      "id": "stream-access",
+      "type": "security",
+      "label": "Stream 访问安全门",
+      "sublabel": "Origin 检查 + 作用域 HMAC",
+      "tag": "TTL ≤ 10 分钟",
+      "pos": [610, 80],
+      "size": [205, 72]
+    },
+    {
+      "id": "hvigor-runner",
+      "type": "backend",
+      "label": "Hvigor 构建执行器",
+      "sublabel": "显式 project → 单个 HAP",
+      "tag": "Host 进程",
+      "pos": [315, 555],
+      "size": [210, 72]
+    },
+    {
+      "id": "vision-ocr",
+      "type": "backend",
+      "label": "Apple Vision OCR",
+      "sublabel": "已编译 Swift helper",
+      "tag": "仅 macOS",
+      "pos": [610, 555],
+      "size": [205, 72]
+    },
+    {
+      "id": "frame-cache",
+      "type": "database",
+      "label": "Host Artifact 缓存",
+      "sublabel": "最新 PNG + 临时 UI tree",
+      "tag": "受限本地文件",
+      "pos": [900, 555],
+      "size": [215, 72]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "DSH Host 进程 · Node.js",
+      "wraps": ["plugin-entry", "runtime", "device-io", "stream-routes", "stream-access", "hvigor-runner", "vision-ocr", "frame-cache"],
+      "pad": 28
+    }
+  ],
+  "connections": [
+    { "id": "agent-tool-call", "from": "dsh-agent", "to": "plugin-entry", "label": "tool 调用 / JSON", "variant": "emphasis", "labelAt": [243, 396] },
+    { "id": "tool-dispatch", "from": "plugin-entry", "to": "runtime", "label": "已校验参数", "labelAt": [484, 396] },
+    { "id": "runtime-device-io", "from": "runtime", "to": "device-io", "label": "定向设备操作", "variant": "emphasis", "labelAt": [783, 396] },
+    { "id": "hdc-usb", "from": "device-io", "to": "usb-device", "label": "USB · hdc -t connect key", "variant": "emphasis", "labelAt": [1090, 396] },
+    { "id": "panel-fetch", "from": "web-panel", "to": "stream-routes", "label": "同源 fetch", "labelAt": [280, 166] },
+    { "id": "routes-access", "from": "stream-routes", "to": "stream-access", "label": "签发 / 校验 grant", "variant": "security", "labelAt": [575, 166] },
+    { "id": "routes-runtime", "from": "stream-routes", "to": "runtime", "label": "截图 / 控制", "fromSide": "bottom", "toSide": "top" },
+    { "id": "entry-routes", "from": "plugin-entry", "to": "stream-routes", "label": "挂载 4 条 routes", "variant": "dashed", "fromSide": "top", "toSide": "bottom", "labelDx": -8 },
+    { "id": "runtime-build", "from": "runtime", "to": "hvigor-runner", "label": "harmony_build", "variant": "dashed", "fromSide": "bottom", "toSide": "top" },
+    { "id": "runtime-ocr", "from": "runtime", "to": "vision-ocr", "label": "识别 frame", "variant": "dashed", "fromSide": "bottom", "toSide": "top" },
+    { "id": "io-cache", "from": "device-io", "to": "frame-cache", "label": "写入最新 artifacts", "fromSide": "bottom", "toSide": "top" },
+    { "id": "cache-ocr", "from": "frame-cache", "to": "vision-ocr", "label": "PNG 路径", "variant": "dashed" }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "一个 runtime，两类入口",
+      "items": [
+        "Cordis tools 与浏览器面板汇入同一个 HarmonyRuntime。",
+        "浏览器从不直接连接 HDC。"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "设备链路",
+      "items": [
+        "仅 USB + Connected 设备可执行操作。",
+        "HDC 命令显式指定 connect key，并按设备串行执行。"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "安全边界",
+      "items": [
+        "面板 routes 要求 loopback、同源信任与作用域 HMAC capability。",
+        "Frame-bound 输入拒绝过期截图；UI tree / OCR 目标存在歧义时拒绝操作。"
+      ]
+    }
+  ]
+}

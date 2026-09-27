@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/Users/didi/project/code/ai/dsh-harmony/docs/assets/harmony-key-design.archify.json",
+  "output": "/Users/didi/project/code/ai/dsh-harmony/docs/assets/harmony-key-design.html",
+  "specification": {
+    "sha256": "c7b0d7a8fdbdf8d7e4295a3f82054da986eff942dad8d3cab24e009b19c87f6e",
+    "bytes": 2288
+  },
+  "artifact": {
+    "sha256": "88e8a41e5bd13373852183c378d5fae628d77d795b9a8e39ca7ff65ddd784e6a",
+    "bytes": 708760
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  },
+  "visual_review": "passed",
+  "visualReview": {
+    "status": "passed",
+    "automatedReceipt": "harmony-key-design.visual-check.json",
+    "inspectedScreenshots": [
+      "harmony-key-design.visual-check.1440x900.light.png",
+      "harmony-key-design.visual-check.1440x900.dark.png",
+      "harmony-key-design.visual-check.2048x1320.light.png",
+      "harmony-key-design.visual-check.2048x1320.dark.png"
+    ],
+    "correction_rounds": 1,
+    "result": "人工复核四张截图：标题、节点和连线标注清晰，无截断、重叠或连线穿过节点；深浅色均可读。三列布局将两种入口与操作后验证清楚区分。",
+    "scope": "概念架构图。右下方 Agent 验证对应工具调用结果，不表示用户操作面板后会自动触发 Agent。"
+  }
+}
